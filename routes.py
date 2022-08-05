@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Body, Request, Response, HTTPException, status
 from fastapi.encoders import jsonable_encoder
 from typing import List
-
+from typing import Optional
 from models import Product,ProductUpdate
 
 router = APIRouter()
@@ -19,10 +19,25 @@ def create_book(request: Request, item: Product = Body(...)):
 
 
 @router.get("/", response_description="List all products", response_model=List[Product])
-def list_products(request: Request):
-    prod =list(request.app.database["trial_prod"].find(limit=100))
-    print(prod)
-    return prod
+def list_products(request: Request,categotry:Optional[str]=None,
+    brand:Optional[str]=None,min_range:Optional[int]=None,
+    max_range:Optional[int]=None):
+
+    ans=[]
+    if categotry!=None:
+        ans.append({'category':categotry})
+    if brand!=None:
+        ans.append({'brand':brand})
+    if min_range!=None and max_range!=None:
+        ans.append({ "$and": [ { 'mrp': { '$gt': min_range } }, { 'mrp': { '$lt': max_range } } ] })
+    
+    if len(ans)>=1:
+        prod=list(request.app.database["trial_prod"].find({'$and':ans}))
+        return prod
+    else:
+        prod =list(request.app.database["trial_prod"].find())
+        return prod
+    
 
 
 @router.get("/{id}", response_description="Get a single product by product_id", response_model=Product)
