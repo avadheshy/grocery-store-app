@@ -3,7 +3,7 @@ from fastapi.encoders import jsonable_encoder
 from typing import List
 from typing import Optional
 from models import Product,ProductUpdate
-
+import pymongo
 router = APIRouter()
 
 @router.post("/", response_description="Create a new product", status_code=status.HTTP_201_CREATED, response_model=Product)
@@ -21,7 +21,7 @@ def create_book(request: Request, item: Product = Body(...)):
 @router.get("/", response_description="List all products", response_model=List[Product])
 def list_products(request: Request,categotry:Optional[str]=None,
     brand:Optional[str]=None,min_range:Optional[int]=None,
-    max_range:Optional[int]=None):
+    max_range:Optional[int]=None,Sort:Optional[str]=None):
 
     ans=[]
     if categotry!=None:
@@ -30,13 +30,22 @@ def list_products(request: Request,categotry:Optional[str]=None,
         ans.append({'brand':brand})
     if min_range!=None and max_range!=None:
         ans.append({ "$and": [ { 'mrp': { '$gt': min_range } }, { 'mrp': { '$lt': max_range } } ] })
-    
-    if len(ans)>=1:
-        prod=list(request.app.database["trial_prod"].find({'$and':ans}))
-        return prod
+    print(len(ans))
+    if Sort!=None:
+        if len(ans)>=1:
+            prod=list(request.app.database["trial_prod"].find({'$and':ans}).sort(Sort,1))
+            return prod
+        else:
+            prod =list(request.app.database["trial_prod"].find({}).sort(Sort,1))
+            return prod
     else:
-        prod =list(request.app.database["trial_prod"].find())
-        return prod
+        if len(ans)>=1:
+            prod=list(request.app.database["trial_prod"].find({'$and':ans}))
+            return prod
+        else:
+            prod =list(request.app.database["trial_prod"].find({}))
+            return prod
+
     
 
 
