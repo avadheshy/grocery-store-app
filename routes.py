@@ -36,7 +36,6 @@ def create_prod(request: Request, item: Product = Body(...)):
 def list_products(request: Request,categotry:List[str] = Query(None),
     brand:List[str] = Query(None),min_range:Optional[int]=None,
     max_range:Optional[int]=None,Sort: List[str] = Query(None)):
-    ans=[]
     list_cate=[]
     list_brand=[]
     if categotry is not None:
@@ -45,32 +44,65 @@ def list_products(request: Request,categotry:List[str] = Query(None),
     if brand is not None:
         for i in brand:
             list_brand.append({'brand':i})
-    print(list_brand)
-    print(list_cate)
-    sort_query={}
+    dict_cate={ '$or':list_cate}
+    dict_brand={ '$or': list_brand}
+    dict_sort={}
     if Sort is not None:
         for i in Sort:
-            sort_query[i]=1
-    ans=[]
+            dict_sort[i]=1
+    # if min_range!=None and max_range!=None:
+    #     ans.append({ "$and": [ { 'mrp': { '$gt': min_range } }, { 'mrp': { '$lt': max_range } } ] })
+    if categotry is not None:
+        if brand is not None:
+            if min_range!=None and max_range!=None:
+                if Sort!=None:
+                    pass
+                else:
+                    pass
+            else:
+                pass
+        else:
+            pass
+    else:
+        if brand is not None:
+            if min_range!=None and max_range!=None:
+                pass
+            else:
+                pass
+        else:
+            pass
+        
+    # ans=[]
+    # list_cate=[]
+    # list_brand=[]
+    # if categotry is not None:
+    #     for i in categotry:
+    #         list_cate.append({'category':i})
+    # if brand is not None:
+    #     for i in brand:
+    #         list_brand.append({'brand':i})
+    # print(list_brand)
+    # print(list_cate)
+    # sort_query={}
+    # if Sort is not None:
+    #     for i in Sort:
+    #         sort_query[i]=1
+    # ans=[]
 
     
 
-    if list_cate is not None:
-        ans.append({'$or':list_cate})
-    if list_brand is not None:
-        ans.append({'$or':list_brand})
-    if min_range!=None and max_range!=None:
-        ans.append({ "$and": [ { 'mrp': { '$gt': min_range } }, { 'mrp': { '$lt': max_range } } ] })
-    if len(ans)>=1:
-        prod =list(request.app.database["trial_prod"].aggregate([
-            { '$match' : { '$and' : ans } },
-            #{ '$sort' : sort_query}
-        ]))
-        return prod
+    # if list_cate is not None:
+    #     ans.append({'$or':list_cate})
+    # if list_brand is not None:
+    #     ans.append({'$or':list_brand})
+    # if min_range!=None and max_range!=None:
+    #     ans.append({ "$and": [ { 'mrp': { '$gt': min_range } }, { 'mrp': { '$lt': max_range } } ] })
+    # if len(ans)>=1:
+    #     prod =list(request.app.database["trial_prod"].aggregate([
+    #         { '$match' : { '$and' : ans } },
+    #     ]))
+    #     return prod
     # else:
-    #     print('hello')
-    #     print('hello')
-    #     print('hello')
     #     prod =list(request.app.database["trial_prod"].aggregate([
     #         { '$match' : {  }}
     #     ]))
@@ -78,12 +110,6 @@ def list_products(request: Request,categotry:List[str] = Query(None),
 
 
 
-
-
-# @router.get("/search", response_description="List all products", response_model=List[Product])
-# def search(request:Request, search_char:str):
-#     prod =list(request.app.database["trial_prod"].find({ '$text':{'$search' :search_char}}))
-#     return prod
 
 @router.get("/search", response_description="List all products", response_model=List[Product])
 def search(request:Request, search_char:str):
