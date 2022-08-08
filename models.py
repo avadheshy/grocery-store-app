@@ -1,10 +1,11 @@
+from distutils.command.upload import upload
 from pydoc import describe
 import uuid
 from typing import Optional
 from datetime import datetime
 from pydantic import BaseModel, Field
 from typing import Set, Union
-
+from fastapi import File,UploadFile
 
 class Product(BaseModel):
     product_id: int = Field(...)
@@ -19,10 +20,14 @@ class Product(BaseModel):
     sub_category: str = Field(...)
     brand: str = Field(...)
     score: int = Field(...)
-    #image: Union[Image, None] = None
+    #img: bytes  =File(...)
     #rating: int= Field(...)
     #date_created:datetime=Field() 
     is_active:bool=Field(...)
+
+
+    class config:
+        orm_mode=True
     
 
 class ProductUpdate(BaseModel):
@@ -49,7 +54,7 @@ class Varients(BaseModel):
 
 class sku(BaseModel):
     id: int = Field(...)
-    verient_id: int = Field(...)
+    varient_id: int = Field(...)
     quantity:int=Field(...)
     suplier_id: str = Field(...)
 
