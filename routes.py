@@ -20,141 +20,42 @@ def create_prod(request: Request, item: Product = Body(...)):
         return created_product
     
 
-# @router.post("/{id}/varient/", response_description="Create a new product", status_code=status.HTTP_201_CREATED, response_model=Product)
-# def create_var(request: Request, item: Varients = Body(...)):
-#     item = jsonable_encoder(item)
-#     item['is_active']=True
-#     new_var = request.app.database["trial_var"].insert_one(item)
-#     created_var = request.app.database["trial_var"].find_one(
-#         {"_id": new_product.inserted_id}
-#     )
-
-#     return created_var
-
-
 @router.get("/", response_description="List all products",status_code=status.HTTP_200_OK, response_model=List[Product])
-def list_products(request: Request,categotry:List[str] = Query(None),
-    brand:List[str] = Query(None),min_range:Optional[int]=None,
-    max_range:Optional[int]=None,Sort: List[str] = Query(None)):
-    list_cate=[]
-    list_brand=[]
-    if categotry is not None:
-        for i in categotry:
-            list_cate.append({'category':i})
-    if brand is not None:
-        for i in brand:
-            list_brand.append({'brand':i})
-    dict_cate={ '$or':list_cate}
-    dict_brand={ '$or': list_brand}
-    dict_sort={}
-    dict_rang={ "$and": [ { 'mrp': { '$gt': min_range } }, { 'mrp': { '$lt': max_range } } ] }
+def list_products(request: Request,Categotry:list[str]=Query(None),
+    Brand:list[str]=Query(None),min_range:Optional[int]=None,
+    max_range:Optional[int]=None,Sort:list[str]=Query(None)):
+    sort_list=[]
     if Sort is not None:
         for i in Sort:
-            dict_sort[i]=1
-   
-    if categotry is not None:
-        if brand is not None:
-            if min_range!=None and max_range!=None:
-                if Sort!=None:
-                    prod =list(request.app.database["trial_prod"].aggregate([
-                    { '$match' : { '$and' : [dict_cate,dict_brand,dict_rang] } },
-                    { '$sort':dict_sort}
-                    ]))
-                    return prod
-                else:
-                    prod =list(request.app.database["trial_prod"].aggregate([
-                    { '$match' : { '$and' : [dict_cate,dict_brand,dict_rang] } },
-                    ]))
-                    return prod
-            else:
-                if Sort!=None:
-                    prod =list(request.app.database["trial_prod"].aggregate([
-                    { '$match' : { '$and' : [dict_cate,dict_brand] } },
-                    { '$sort':dict_sort}
-                    ]))
-                    return prod
-                else:
-                    prod =list(request.app.database["trial_prod"].aggregate([
-                    { '$match' : { '$and' : [dict_cate,dict_brand] } },
-                    ]))
-                    return prod
-                
+            sort_list.append((i,1))
+    ans=[]
+    category_list=[]
+    if Categotry is not None:
+        for i in Categotry:
+            category_list.append({'category':i})
+        ans.append({ "$or":category_list})
+    brand_list=[]
+    if Brand is not None:
+        for i in Brand:
+            brand_list.append({'brand':i})
+        ans.append({ "$or":brand_list})
+    print(ans)
+    if min_range!=None and max_range!=None:
+        ans.append({ "$and": [ { 'mrp': { '$gt': min_range } }, { 'mrp': { '$lt': max_range } } ] })
+    if Sort!=None:
+        if len(ans)>=1:
+            prod=list(request.app.database["trial_prod"].find({'$and':ans}).sort(sort_list))
+            return prod
         else:
-            if min_range!=None and max_range!=None:
-                if Sort!=None:
-                    prod =list(request.app.database["trial_prod"].aggregate([
-                    { '$match' : { '$and' : [dict_cate,dict_rang] } },
-                    { '$sort':dict_sort}
-                    ]))
-                    return prod
-                else:
-                    prod =list(request.app.database["trial_prod"].aggregate([
-                    { '$match' : { '$and' : [dict_cate,dict_rang] } },
-                    ]))
-                    return prod
-            else:
-                if Sort!=None:
-                    prod =list(request.app.database["trial_prod"].aggregate([
-                    { '$match' : { '$and' : [dict_cate] } },
-                    { '$sort':dict_sort}
-                    ]))
-                    return prod
-                else:
-                    prod =list(request.app.database["trial_prod"].aggregate([
-                    { '$match' : { '$and' : [dict_cate] } },
-                    ]))
-                    return prod
+            prod =list(request.app.database["trial_prod"].find({}).sort(sort_list))
+            return prod
     else:
-        if brand is not None:
-            if min_range!=None and max_range!=None:
-                if Sort!=None:
-                    prod =list(request.app.database["trial_prod"].aggregate([
-                    { '$match' : { '$and' : [dict_brand,dict_rang] } },
-                    { '$sort':dict_sort}
-                    ]))
-                    return prod
-                else:
-                    prod =list(request.app.database["trial_prod"].aggregate([
-                    { '$match' : { '$and' : [dict_brand,dict_rang] } },
-                    ]))
-                    return prod
-            else:
-                if Sort!=None:
-                    prod =list(request.app.database["trial_prod"].aggregate([
-                    { '$match' : { '$and' : [dict_brand] } },
-                    { '$sort':dict_sort}
-                    ]))
-                    return prod
-                else:
-                    prod =list(request.app.database["trial_prod"].aggregate([
-                    { '$match' : { '$and' : [dict_brand] } },
-                    ]))
-                    return prod
-                
+        if len(ans)>=1:
+            prod=list(request.app.database["trial_prod"].find({'$and':ans}))
+            return prod
         else:
-            if min_range!=None and max_range!=None:
-                if Sort!=None:
-                    prod =list(request.app.database["trial_prod"].aggregate([
-                    { '$match' : { '$and' : [dict_rang] } },
-                    { '$sort':dict_sort}
-                    ]))
-                    return prod
-                else:
-                    prod =list(request.app.database["trial_prod"].aggregate([
-                    { '$match' : { '$and' : [dict_cate,dict_rang] } },
-                    ]))
-                    return prod
-            else:
-                if Sort!=None:
-                    prod =list(request.app.database["trial_prod"].aggregate([
-                    { '$match' : { '$and' : [dict_cate] } },
-                    { '$sort':dict_sort}
-                    ]))
-                    return prod
-                else:
-                    prod =list(request.app.database["trial_prod"].aggregate([
-                    { '$matc
-                    return prod
+            prod =list(request.app.database["trial_prod"].find({}))
+            return prod
         
 @router.get("/search", response_description="List all products", response_model=List[Product])
 def search(request:Request, search_char:str):
