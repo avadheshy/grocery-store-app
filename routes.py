@@ -51,13 +51,14 @@ def list_products(request: Request, Categotry: list[str] = Query(None),
         for i in Brand:
             if i is not None:
                 brand_list.append({'brand': i})
-        if len(category_list) > 0:
-            ans.append({"$or": brand_list})
 
+        if len(brand_list) > 0:
+            ans.append({"$or": brand_list})
     if min_range != None and max_range != None:
         ans.append(
             {"$and": [{'mrp': {'$gt': min_range}}, {'mrp': {'$lt': max_range}}]})
     ans.append({'is_active':True})
+    print(ans)
     if Sort != None:
         if len(ans) >= 1:
             prod = list(request.app.database["trial_prod"].find(
