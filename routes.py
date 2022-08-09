@@ -18,8 +18,8 @@ def create_prod(request: Request, item: Product = Body(...)):
     )
     if created_product is not None:
         return created_product
-@router.post("/variant", response_description="Create a new product", status_code=status.HTTP_201_CREATED, response_model=Variants)
-def add_variant(request: Request, item: Variants = Body(...)):
+@router.post("/variant", response_description="Create a new product", status_code=status.HTTP_201_CREATED, response_model=Varients)
+def add_variant(request: Request, item: Varients = Body(...)):
     item = jsonable_encoder(item)
 
     new_product = request.app.database["varients"].insert_one(item)
@@ -77,13 +77,15 @@ def list_products(request: Request, Categotry: list[str] = Query(None),
             return prod
 
 
-@router.get("/search", response_description="List all products", status_code=status.HTTP_200_OK,response_model=List[Product])
-def search(request: Request, search_char: str):
+@router.get("/search", response_description="List all products", response_model=List[Product])
+def search(request: Request, search_char: str, page_num: int, page_size: int = 2):
+    start = (page_num-1)*page_size
+    end = start*page_size
     prod = list(request.app.database["trial_prod"].find({"$or": [{'title': {'$regex': search_char, '$options': "i"}},
-            {'brand': {
-            '$regex': search_char, '$options': "i"}},
-            {'category': {'$regex': search_char, '$options': "i"}}]}))
-    return prod
+                                                                 {'brand': {
+                                                                     '$regex': search_char, '$options': "i"}},
+                                                                 {'category': {'$regex': search_char, '$options': "i"}}]}))
+    return prod[start:end]
 
 
 @router.get("/{id}", response_description="Get a single product by product_id",status_code=status.HTTP_200_OK, response_model=Product)
