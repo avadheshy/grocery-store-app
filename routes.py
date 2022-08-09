@@ -1,4 +1,4 @@
-from itertools import product
+
 from fastapi import APIRouter, Body, Request, Response, HTTPException, status,Query
 from fastapi.encoders import jsonable_encoder
 from typing import List
@@ -26,22 +26,27 @@ def list_products(request: Request,Categotry:list[str]=Query(None),
     max_range:Optional[int]=None,Sort:list[str]=Query(None)):
     sort_list=[]
     if Sort is not None:
-        for i in Sort:
-            sort_list.append((i,1))
+        for i in range(len(Sort)):
+            sort_list.append((Sort[i],1))
     ans=[]
     category_list=[]
     if Categotry is not None:
         for i in Categotry:
-            category_list.append({'category':i})
-        ans.append({ "$or":category_list})
+            if i is not None:
+                category_list.append({'category':i})
+        if len(category_list)>0:
+            ans.append({ "$or":category_list})
     brand_list=[]
     if Brand is not None:
         for i in Brand:
-            brand_list.append({'brand':i})
-        ans.append({ "$or":brand_list})
+            if i is not None:
+                brand_list.append({'brand':i})
+        if len(category_list)>0:
+            ans.append({ "$or":brand_list})
     print(ans)
     if min_range!=None and max_range!=None:
         ans.append({ "$and": [ { 'mrp': { '$gt': min_range } }, { 'mrp': { '$lt': max_range } } ] })
+    print(ans)
     if Sort!=None:
         if len(ans)>=1:
             prod=list(request.app.database["trial_prod"].find({'$and':ans}).sort(sort_list))
