@@ -5,7 +5,8 @@ from typing import Optional
 from datetime import datetime
 from pydantic import BaseModel, Field
 from typing import Set, Union
-from fastapi import File,UploadFile
+from fastapi import File, UploadFile
+
 
 class Product(BaseModel):
     product_id: int = Field(...)
@@ -22,40 +23,39 @@ class Product(BaseModel):
     score: int = Field(...)
     #img: bytes  =File(...)
     #rating: int= Field(...)
-    #date_created:datetime=Field() 
-    is_active:bool=Field(...)
-
+    # date_created:datetime=Field()
+    is_active: bool = Field(...)
 
     class config:
-        orm_mode=True
-    
+        orm_mode = True
+
 
 class ProductUpdate(BaseModel):
-    title:Optional[str]
-    description:Optional[str]
-    category:Optional[str]
-    mrp:Optional[int]
+    title: Optional[str]
+    description: Optional[str]
+    category: Optional[str]
+    mrp: Optional[int]
 
 
 # class Image(BaseModel):
 #     url: str
-#     name: str 
+#     name: str
 
 class Varients(BaseModel):
     id: int = Field(...)
     product_id: int = Field(...)
-    color:str = Field(...)
-    size:int = Field(...)
-    quantity:int = Field(...)
+    color: str = Field(...)
+    size: int = Field(...)
+    quantity: int = Field(...)
     #child_image:Union[Image, None] = None
-    sku:int = Field(...)
-    is_available:bool=Field(...)   
+    sku: int = Field(...)
+    is_available: bool = Field(...)
 
 
 class sku(BaseModel):
     id: int = Field(...)
     varient_id: int = Field(...)
-    quantity:int=Field(...)
+    quantity: int = Field(...)
     suplier_id: str = Field(...)
 
 
@@ -70,4 +70,4 @@ class inventry(BaseModel):
     varient_id: int = Field(...)
     sku: int = Field(...)
     address: str = Field(...)
-    quantity:int = Field(...)
+    quantity: int = Field(...)
